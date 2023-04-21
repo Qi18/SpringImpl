@@ -4,6 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 **/src/main/java/com/example/wordgen/util/OpenAIConfig.java
+out/
 
 ### STS ###
 .apt_generated
