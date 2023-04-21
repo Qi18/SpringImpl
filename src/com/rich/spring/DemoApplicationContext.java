@@ -4,6 +4,7 @@ import com.rich.service.AppConfig;
 
 import java.io.File;
 import java.net.URL;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author: rich
@@ -14,9 +15,12 @@ public class DemoApplicationContext {
 
     private Class configClass;
 
+    private ConcurrentHashMap<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<String, BeanDefinition>();
+    private ConcurrentHashMap<String, Object> singletonOjects = new ConcurrentHashMap<String, Object>(); //单例池
+
     public DemoApplicationContext(Class appConfigClass) {
         this.configClass = appConfigClass;
-        //扫描
+        //扫描，得到beanDefinitionMap
         if (configClass.isAnnotationPresent(ComponentScan.class)) {
             ComponentScan componentScanAnnotation = (ComponentScan) configClass.getAnnotation(ComponentScan.class);
             String path = componentScanAnnotation.value(); //扫描路径 com.rich.service
@@ -24,16 +28,77 @@ public class DemoApplicationContext {
             path = path.replace(".","/");//相对路径
             ClassLoader classLoader = DemoApplicationContext.class.getClassLoader();//类加载器含有绝对路径
             URL resource = classLoader.getResource(path);//URL就是文件夹
-
             File file = new File(resource.getFile());
-            System.out.println(file);
             if (file.isDirectory()) {
+                File[] files = file.listFiles();
 
+                for (File f : files) {
+                    //筛选class文件
+                    String fileName = f.getAbsolutePath();
+                    System.out.println(fileName);
+                    if (fileName.endsWith(".class")) {
+                        //com\rich\service\UserService
+                        String className = fileName.substring(fileName.indexOf("com"), fileName.indexOf(".class"));
+                        className = className.replace("\\",".");
+                        try {
+                            Class<?> clazz = classLoader.loadClass(className);
+                            if (clazz.isAnnotationPresent(Component.class)) {
+                                Component annotation = clazz.getAnnotation(Component.class);
+                                String beanName = annotation.value();
+                                //是一个Bean
+                                //BeanDefinition,便于getBean不用解析就获得相应对象
+                                //单例，多例
+                                BeanDefinition beanDefinition = new BeanDefinition();
+                                beanDefinition.setType(clazz);
+                                if (clazz.isAnnotationPresent(Scope.class)) {
+                                    Scope scopeAnnotation = clazz.getAnnotation(Scope.class);
+                                    beanDefinition.setScope(scopeAnnotation.value());
+                                } else {
+                                    beanDefinition.setScope("singleton");
+                                }
+                                beanDefinitionMap.put(beanName, beanDefinition);
+                            }
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
             }
+        }
+
+        //创建单例bean对象,实例化
+        for (String beanName : beanDefinitionMap.keySet()) {
+            BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
+            if (beanDefinition.getScope().equals("singleton")) {
+                Object bean = createBean(beanName, beanDefinition);
+                singletonOjects.put(beanName, bean);
+            }
+
         }
     }
 
+    private Object createBean(String beanName, BeanDefinition beanDefinition) {
+        return null;
+    }
+
     public Object getBean(String beanName){
+        BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
+        if (beanDefinition == null) {
+            throw new NullPointerException();
+        } else {
+            String scope = beanDefinition.getScope();
+            if (scope.equals("singleton")) {
+                Object bean = singletonOjects.get(beanName);
+                if (bean == null) {
+                    bean = createBean(beanName, beanDefinition);
+                    singletonOjects.put(beanName, bean);
+                }
+                return bean;
+            } else {
+                //多例
+                return createBean(beanName, beanDefinition);
+            }
+        }
         return null;
     }
 }

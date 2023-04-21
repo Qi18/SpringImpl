@@ -1,6 +1,7 @@
 package com.rich.service;
 
 import com.rich.spring.Component;
+import com.rich.spring.Scope;
 
 /**
  * @author: rich
@@ -8,5 +9,6 @@ import com.rich.spring.Component;
  * @description:
  */
 @Component("userService")
+@Scope("prototype")
 public class UserService {
 }
