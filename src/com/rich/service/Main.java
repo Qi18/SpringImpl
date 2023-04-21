@@ -8,6 +8,8 @@ public class Main {
 
         DemoApplicationContext context = new DemoApplicationContext(AppConfig.class);//启动Spring容器
 
-        Object userService = (UserService)context.getBean("userService");
+        UserService userService = (UserService)context.getBean("userService");
+
+        userService.test();
     }
 }

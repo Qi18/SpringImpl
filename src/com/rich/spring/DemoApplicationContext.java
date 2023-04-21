@@ -2,7 +2,10 @@ package com.rich.spring;
 
 import com.rich.service.AppConfig;
 
+import java.beans.Introspector;
 import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,6 +48,9 @@ public class DemoApplicationContext {
                             if (clazz.isAnnotationPresent(Component.class)) {
                                 Component annotation = clazz.getAnnotation(Component.class);
                                 String beanName = annotation.value();
+                                if (beanName.endsWith("")) {//没有命名
+                                    beanName = Introspector.decapitalize(clazz.getSimpleName());
+                                }
                                 //是一个Bean
                                 //BeanDefinition,便于getBean不用解析就获得相应对象
                                 //单例，多例
@@ -77,7 +83,28 @@ public class DemoApplicationContext {
         }
     }
 
-    private Object createBean(String beanName, BeanDefinition beanDefinition) {
+    private Object createBean(String beanName, BeanDefinition beanDefinition) {//模拟bean的生命周期
+        Class clazz = beanDefinition.getType();
+        try {
+            Object instance = clazz.getConstructor().newInstance(); //存在无参的构造方法
+            //对bean的属性赋值，依赖注入
+            for (Field f : clazz.getDeclaredFields()) {
+              if (f.isAnnotationPresent(Autowired.class)) {
+                  f.setAccessible(true);
+                  f.set(instance, getBean(f.getName()));//先type后name
+              }
+            }
+            return instance;
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
         return null;
     }
 
@@ -99,6 +126,5 @@ public class DemoApplicationContext {
                 return createBean(beanName, beanDefinition);
             }
         }
-        return null;
     }
 }
