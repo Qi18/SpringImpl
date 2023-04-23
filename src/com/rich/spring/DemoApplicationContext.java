@@ -119,7 +119,7 @@ public class DemoApplicationContext {
             }//Spring会调用这个方法
             //初始化后
             for (BeanPostProcessor beanPostProcessor: beanPostProcessorList) {
-                beanPostProcessor.postProcessAfterInitialization(beanName, instance);
+                instance = beanPostProcessor.postProcessAfterInitialization(beanName, instance);
             }
             //初始化后 AOP
             //BeanPostProcessor Bean的后置处理器

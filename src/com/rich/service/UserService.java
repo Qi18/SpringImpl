@@ -8,7 +8,7 @@ import com.rich.spring.*;
  * @description:
  */
 @Component
-public class UserService implements BeanNameAware, InitializingBean {
+public class UserService implements BeanNameAware, InitializingBean, UserInterface {
 
     @Autowired
     private OrderService orderService;
