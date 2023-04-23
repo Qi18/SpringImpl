@@ -7,6 +7,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -20,6 +21,7 @@ public class DemoApplicationContext {
 
     private ConcurrentHashMap<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<String, BeanDefinition>();
     private ConcurrentHashMap<String, Object> singletonOjects = new ConcurrentHashMap<String, Object>(); //单例池
+    private ArrayList<BeanPostProcessor> beanPostProcessorList = new ArrayList<>();
 
     public DemoApplicationContext(Class appConfigClass) {
         this.configClass = appConfigClass;
@@ -38,7 +40,6 @@ public class DemoApplicationContext {
                 for (File f : files) {
                     //筛选class文件
                     String fileName = f.getAbsolutePath();
-                    System.out.println(fileName);
                     if (fileName.endsWith(".class")) {
                         //com\rich\service\UserService
                         String className = fileName.substring(fileName.indexOf("com"), fileName.indexOf(".class"));
@@ -46,6 +47,12 @@ public class DemoApplicationContext {
                         try {
                             Class<?> clazz = classLoader.loadClass(className);
                             if (clazz.isAnnotationPresent(Component.class)) {
+
+                                if (BeanPostProcessor.class.isAssignableFrom(clazz)) {
+                                    BeanPostProcessor instance = (BeanPostProcessor) clazz.newInstance();
+                                    beanPostProcessorList.add(instance);
+                                }
+
                                 Component annotation = clazz.getAnnotation(Component.class);
                                 String beanName = annotation.value();
                                 if (beanName.endsWith("")) {//没有命名
@@ -65,6 +72,10 @@ public class DemoApplicationContext {
                                 beanDefinitionMap.put(beanName, beanDefinition);
                             }
                         } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (InstantiationException e) {
+                            e.printStackTrace();
+                        } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }
                     }
@@ -94,6 +105,26 @@ public class DemoApplicationContext {
                   f.set(instance, getBean(f.getName()));//先type后name
               }
             }
+            //Aware回调
+            if (instance instanceof BeanNameAware) {
+                ((BeanNameAware) instance).setBeanName(beanName);
+            }//Spring会告诉某个东西给bean
+            //初始化前
+            for (BeanPostProcessor beanPostProcessor: beanPostProcessorList) {
+                beanPostProcessor.postProcessBeforeInitialization(beanName, instance);
+            }
+            //初始化
+            if (instance instanceof InitializingBean) {
+                ((InitializingBean) instance).afterPropertiesSet();
+            }//Spring会调用这个方法
+            //初始化后
+            for (BeanPostProcessor beanPostProcessor: beanPostProcessorList) {
+                beanPostProcessor.postProcessAfterInitialization(beanName, instance);
+            }
+            //初始化后 AOP
+            //BeanPostProcessor Bean的后置处理器
+
+
             return instance;
         } catch (InstantiationException e) {
             e.printStackTrace();
