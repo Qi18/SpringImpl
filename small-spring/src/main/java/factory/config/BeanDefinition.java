@@ -1,3 +1,5 @@
+package factory.config;
+
 /**
  * @author: rich
  * @date: 2023/4/23 19:31

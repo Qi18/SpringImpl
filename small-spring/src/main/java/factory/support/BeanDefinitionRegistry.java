@@ -1,3 +1,7 @@
+package factory.support;
+
+import factory.config.BeanDefinition;
+
 /**
  * @author: rich
  * @date: 2023/4/23 20:03
