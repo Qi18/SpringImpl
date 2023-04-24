@@ -1,4 +1,4 @@
-package factory.config;
+package cn.springframework.beans.factory.config;
 
 /**
  * @author: rich

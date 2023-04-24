@@ -1,6 +1,6 @@
-package factory.support;
+package cn.springframework.beans.factory.support;
 
-import factory.config.BeanDefinition;
+import cn.springframework.beans.factory.config.BeanDefinition;
 
 /**
  * @author: rich

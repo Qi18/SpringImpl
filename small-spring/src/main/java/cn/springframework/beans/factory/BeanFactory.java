@@ -1,4 +1,4 @@
-package factory;
+package cn.springframework.beans.factory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

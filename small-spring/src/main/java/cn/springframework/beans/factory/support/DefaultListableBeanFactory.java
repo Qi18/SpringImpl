@@ -1,8 +1,7 @@
-package factory.support;
+package cn.springframework.beans.factory.support;
 
-import factory.config.BeanDefinition;
-import factory.support.AbstractAutowiredCapableBeanFactory;
-import factory.support.BeanDefinitionRegistry;
+import cn.springframework.beans.factory.BeansException;
+import cn.springframework.beans.factory.config.BeanDefinition;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,9 +15,9 @@ public class DefaultListableBeanFactory extends AbstractAutowiredCapableBeanFact
     private Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
 
     @Override
-    public BeanDefinition getBeanDefinition(String beanName) throws Exception {
+    public BeanDefinition getBeanDefinition(String beanName) throws BeansException {
         BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
-        if (beanDefinition == null) throw new Exception("No bean named '" + beanName + "' is defined");
+        if (beanDefinition == null) throw new BeansException("No bean named '" + beanName + "' is defined");
         return beanDefinition;
     }
 
