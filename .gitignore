@@ -7,7 +7,7 @@ target/
 tuling/out/
 */out
 */.idea
-small-spring/SpringImpl.iml
+*/*.iml
 
 ### STS ###
 .apt_generated
