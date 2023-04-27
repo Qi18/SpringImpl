@@ -6,6 +6,7 @@ import cn.springframework.bean.UserService;
 import cn.hutool.core.io.IoUtil;
 import cn.springframework.beans.BeansException;
 import cn.springframework.beans.factory.support.DefaultListableBeanFactory;
+import cn.springframework.context.support.ClassPathXmlApplicationContext;
 import cn.springframework.core.io.DefaultResourceLoader;
 import cn.springframework.core.io.Resource;
 import org.junit.Before;
@@ -22,39 +23,17 @@ import java.io.InputStream;
 
 public class ApiTest {
 
-    private DefaultResourceLoader resourceLoader;
-
-    @Before
-    public void init() {
-        resourceLoader = new DefaultResourceLoader();
-    }
 
     @Test
-    public void test_classpath() throws IOException {
-        Resource resource = resourceLoader.getResource("classpath:spring.xml");
-        InputStream inputStream = resource.getInputStream();
-        String content = IoUtil.readUtf8(inputStream);
-        System.out.println(content);
-    }
+    public void test() throws IOException, BeansException {
+        // 1.初始化 BeanFactory
+        ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring.xml");
 
-    @Test
-    public void test_file() throws IOException {
-        Resource resource = resourceLoader.getResource("src/main/resources/important.properties");
-        InputStream inputStream = resource.getInputStream();
-        String content = IoUtil.readUtf8(inputStream);
-        System.out.println(content);
-    }
-
-    @Test
-    public void test() throws BeansException {
-        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-
-        XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-        reader.loadBeanDefinition("classpath:spring.xml");
-        BeanDefinitionRegistry registry = reader.getRegistry();
-        UserService userService = (UserService) beanFactory.getBean("userService", UserService.class);
+        // 2. 获取Bean对象调用方法
+        UserService userService = applicationContext.getBean("userService", UserService.class);
         userService.queryUser();
     }
+
 
 
 

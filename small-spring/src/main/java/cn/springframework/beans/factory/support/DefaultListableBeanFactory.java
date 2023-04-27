@@ -1,8 +1,10 @@
 package cn.springframework.beans.factory.support;
 
 import cn.springframework.beans.BeansException;
+import cn.springframework.beans.factory.ConfigurableListableBeanFactory;
 import cn.springframework.beans.factory.config.BeanDefinition;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date: 2023/4/23 20:02
  * @description:
  */
-public class DefaultListableBeanFactory extends AbstractAutowiredCapableBeanFactory implements BeanDefinitionRegistry {
+public class DefaultListableBeanFactory extends AbstractAutowiredCapableBeanFactory implements BeanDefinitionRegistry, ConfigurableListableBeanFactory {
     private Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
 
     @Override
@@ -22,6 +24,13 @@ public class DefaultListableBeanFactory extends AbstractAutowiredCapableBeanFact
     }
 
     @Override
+    public void preInstantiateSingletons() throws BeansException {
+        for (String s : beanDefinitionMap.keySet()) {
+            getBean(s);
+        }
+    }
+
+    @Override
     public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
         beanDefinitionMap.put(beanName, beanDefinition);
     }
@@ -29,5 +38,26 @@ public class DefaultListableBeanFactory extends AbstractAutowiredCapableBeanFact
     @Override
     public boolean containsBeanDefinition(String beanName) {
         return beanDefinitionMap.containsKey(beanName);
+    }
+
+    @Override
+    public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
+        Map<String, T> result = new HashMap<>();
+        beanDefinitionMap.forEach((beanName, beanDefinition) -> {
+            Class beanClass = beanDefinition.getBeanClass();
+            if (type.isAssignableFrom(beanClass)) {
+                try {
+                    result.put(beanName, (T) getBean(beanName));
+                } catch (BeansException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        return result;
+    }
+
+    @Override
+    public String[] getBeanDefinitionNames() {
+        return beanDefinitionMap.keySet().toArray(new String[0]);
     }
 }
