@@ -1,7 +1,6 @@
 package cn.springframework.beans.factory;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import cn.springframework.beans.BeansException;
 
 /**
  * @author: rich

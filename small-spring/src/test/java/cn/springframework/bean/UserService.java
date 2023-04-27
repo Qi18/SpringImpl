@@ -1,6 +1,4 @@
-package bean;
-
-import java.nio.file.attribute.UserPrincipal;
+package cn.springframework.bean;
 
 /**
  * @author: rich

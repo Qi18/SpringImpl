@@ -1,6 +1,6 @@
 package cn.springframework.beans.factory.config;
 
-import cn.springframework.beans.factory.PropertyValues;
+import cn.springframework.beans.PropertyValues;
 
 /**
  * @author: rich

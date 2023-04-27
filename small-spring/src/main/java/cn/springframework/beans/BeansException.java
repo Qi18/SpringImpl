@@ -1,4 +1,4 @@
-package cn.springframework.beans.factory;
+package cn.springframework.beans;
 
 /**
  * @author: rich

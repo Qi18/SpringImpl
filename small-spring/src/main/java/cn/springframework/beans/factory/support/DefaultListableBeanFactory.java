@@ -1,6 +1,6 @@
 package cn.springframework.beans.factory.support;
 
-import cn.springframework.beans.factory.BeansException;
+import cn.springframework.beans.BeansException;
 import cn.springframework.beans.factory.config.BeanDefinition;
 
 import java.util.Map;
@@ -24,5 +24,10 @@ public class DefaultListableBeanFactory extends AbstractAutowiredCapableBeanFact
     @Override
     public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
         beanDefinitionMap.put(beanName, beanDefinition);
+    }
+
+    @Override
+    public boolean containsBeanDefinition(String beanName) {
+        return beanDefinitionMap.containsKey(beanName);
     }
 }
