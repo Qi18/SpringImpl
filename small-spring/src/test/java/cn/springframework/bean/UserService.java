@@ -1,14 +1,19 @@
 package cn.springframework.bean;
 
-import cn.springframework.beans.factory.DisposableBean;
-import cn.springframework.beans.factory.InitializingBean;
+import cn.springframework.beans.BeansException;
+import cn.springframework.beans.factory.*;
+import cn.springframework.context.ApplicationContext;
+import cn.springframework.context.ApplicationContextAware;
 
 /**
  * @author: rich
  * @date: 2023/4/23 19:35
  * @description:
  */
-public class UserService implements InitializingBean, DisposableBean {
+public class UserService implements BeanNameAware, BeanClassLoaderAware, ApplicationContextAware, BeanFactoryAware {
+
+    private ApplicationContext applicationContext;
+    private BeanFactory beanFactory;
 
     private String uId;
 
@@ -44,13 +49,31 @@ public class UserService implements InitializingBean, DisposableBean {
         this.userDao = userDao;
     }
 
-    @Override
-    public void destroy() throws Exception {
-        System.out.println("执行销毁前方法");
+    public ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
+
+    public BeanFactory getBeanFactory() {
+        return beanFactory;
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
-        System.out.println("执行初始化方法");
+    public void setBeanClassLoader(ClassLoader classLoader) {
+        System.out.println("ClassLoader：" + classLoader);
+    }
+
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = beanFactory;
+    }
+
+    @Override
+    public void setBeanName(String name) {
+        System.out.println("Bean Name is:" + name);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }
