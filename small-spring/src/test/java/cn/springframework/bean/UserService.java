@@ -1,11 +1,14 @@
 package cn.springframework.bean;
 
+import cn.springframework.beans.factory.DisposableBean;
+import cn.springframework.beans.factory.InitializingBean;
+
 /**
  * @author: rich
  * @date: 2023/4/23 19:35
  * @description:
  */
-public class UserService {
+public class UserService implements InitializingBean, DisposableBean {
 
     private String uId;
 
@@ -41,4 +44,13 @@ public class UserService {
         this.userDao = userDao;
     }
 
+    @Override
+    public void destroy() throws Exception {
+        System.out.println("执行销毁前方法");
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        System.out.println("执行初始化方法");
+    }
 }
