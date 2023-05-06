@@ -9,6 +9,15 @@ import java.util.Map;
  * @date: 2023/4/26 20:10
  * @description:
  */
+
+/**
+ * Extension of the {@link BeanFactory} interface to be implemented by bean factories
+ * that can enumerate all their bean instances, rather than attempting bean lookup
+ * by name one by one as requested by clients. BeanFactory implementations that
+ * preload all their bean definitions (such as XML-based factories) may implement
+ * this interface.
+ * <p>
+ */
 public interface ListableBeanFactory extends BeanFactory{
 
     /**

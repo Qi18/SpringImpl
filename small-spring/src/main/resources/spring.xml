@@ -11,6 +11,7 @@
 
     <bean id="proxyUserDao" class="cn.springframework.bean.ProxyBeanFactory"/>
 
+    <bean class="cn.springframework.event.CustomEventListener"/>
 <!--    <bean class="cn.springframework.common.MyBeanPostProcessor"/>-->
 <!--    <bean class="cn.springframework.common.MyBeanFactoryPostProcessor"/>-->
 

@@ -10,5 +10,7 @@ import cn.springframework.beans.BeansException;
 public interface SingletonBeanRegistry {
     Object getSingleton(String beanName);
 
+    void addSingleton(String beanName, Object singletonObject);
+
     void destroySingletons() throws BeansException;
 }
