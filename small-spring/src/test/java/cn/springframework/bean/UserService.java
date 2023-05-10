@@ -5,21 +5,19 @@ import cn.springframework.beans.factory.*;
 import cn.springframework.context.ApplicationContext;
 import cn.springframework.context.ApplicationContextAware;
 
+import java.util.Random;
+
 /**
  * @author: rich
  * @date: 2023/4/23 19:35
  * @description:
  */
-public class UserService implements BeanNameAware, BeanClassLoaderAware, ApplicationContextAware, BeanFactoryAware {
-
-    private ApplicationContext applicationContext;
-    private BeanFactory beanFactory;
+public class UserService implements IUserService{
 
     private String uId;
 
 //    private UserDao userDao;
 
-    private IUserDao iUserDao;
 
     private String company;
 
@@ -31,10 +29,6 @@ public class UserService implements BeanNameAware, BeanClassLoaderAware, Applica
         this.company = company;
     }
 
-    public void queryUser(){
-        System.out.println("查询用户信息" + iUserDao.queryUserName(uId));
-    }
-
     public String getuId() {
         return uId;
     }
@@ -43,47 +37,24 @@ public class UserService implements BeanNameAware, BeanClassLoaderAware, Applica
         this.uId = uId;
     }
 
-//    public UserDao getUserDao() {
-//        return userDao;
-//    }
-
-    public IUserDao getiUserDao() {
-        return iUserDao;
-    }
-
-    public void setiUserDao(IUserDao iUserDao) {
-        this.iUserDao = iUserDao;
-    }
-//
-//    public void setUserDao(UserDao userDao) {
-//        this.userDao = userDao;
-//    }
-
-    public ApplicationContext getApplicationContext() {
-        return applicationContext;
-    }
-
-    public BeanFactory getBeanFactory() {
-        return beanFactory;
+    @Override
+    public String queryUserInfo() {
+        try {
+            Thread.sleep(new Random(1).nextInt(100));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return "小傅哥，100001，深圳";
     }
 
     @Override
-    public void setBeanClassLoader(ClassLoader classLoader) {
-        System.out.println("ClassLoader：" + classLoader);
+    public String register(String userName) {
+        try {
+            Thread.sleep(new Random(1).nextInt(100));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return "注册用户：" + userName + " success！";
     }
 
-    @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.beanFactory = beanFactory;
-    }
-
-    @Override
-    public void setBeanName(String name) {
-        System.out.println("Bean Name is:" + name);
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
 }

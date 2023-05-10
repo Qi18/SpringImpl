@@ -1,5 +1,12 @@
 package cn.springframework;
 
+import cn.springframework.bean.IUserService;
+import cn.springframework.bean.UserServiceInterceptor;
+import cn.springframework.beans.aop.AdvisedSupport;
+import cn.springframework.beans.aop.TargetSource;
+import cn.springframework.beans.aop.aspectj.AspectJExpressionPointcut;
+import cn.springframework.beans.aop.framework.Cglib2AopProxy;
+import cn.springframework.beans.aop.framework.JdkDynamicAopProxy;
 import cn.springframework.beans.factory.support.BeanDefinitionRegistry;
 import cn.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import cn.springframework.bean.UserService;
@@ -15,6 +22,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 
 /**
  * @author: rich
@@ -26,11 +34,24 @@ public class ApiTest {
 
 
     @Test
-    public void test() throws IOException, BeansException {
-        // 1.初始化 BeanFactory
-        ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring.xml");
-        applicationContext.publishEvent(new CustomEvent(applicationContext, 1019129009086763L, "成功了！"));
-        applicationContext.registerShutdownHook();
+    public void test() throws IOException, BeansException, NoSuchMethodException {
+        IUserService userService = new UserService();
+
+        AdvisedSupport advised = new AdvisedSupport();
+        advised.setMethodInterceptor(new UserServiceInterceptor());
+        advised.setTargetSource(new TargetSource(userService));
+        advised.setMethodMatcher(new AspectJExpressionPointcut(("execution(* cn.springframework.bean.UserService.*(..))")));
+
+
+        // 代理对象(JdkDynamicAopProxy)
+        IUserService proxy_jdk = (IUserService) new JdkDynamicAopProxy(advised).getProxy();
+        // 测试调用
+        System.out.println("测试结果：" + proxy_jdk.queryUserInfo());
+
+        // 代理对象(Cglib2AopProxy)
+        IUserService proxy_cglib = (IUserService) new Cglib2AopProxy(advised).getProxy();
+        // 测试调用
+        System.out.println("测试结果：" + proxy_cglib.register("花花"));
     }
 
 
