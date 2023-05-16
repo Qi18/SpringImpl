@@ -6,10 +6,7 @@ import cn.springframework.beans.BeansException;
 import cn.springframework.beans.PropertyValue;
 import cn.springframework.beans.PropertyValues;
 import cn.springframework.beans.factory.*;
-import cn.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import cn.springframework.beans.factory.config.BeanDefinition;
-import cn.springframework.beans.factory.config.BeanPostProcessor;
-import cn.springframework.beans.factory.config.BeanReference;
+import cn.springframework.beans.factory.config.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -31,6 +28,7 @@ public abstract class AbstractAutowiredCapableBeanFactory extends AbstractBeanFa
         this.instantiationStrategy = instantiationStrategy;
     }
 
+    //执行初始化前方法
     @Override
     public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) throws BeansException {
         Object result = existingBean;
@@ -42,6 +40,7 @@ public abstract class AbstractAutowiredCapableBeanFactory extends AbstractBeanFa
         return result;
     }
 
+    //执行初始化后方法
     @Override
     public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName) throws BeansException {
         Object result = existingBean;
@@ -57,6 +56,7 @@ public abstract class AbstractAutowiredCapableBeanFactory extends AbstractBeanFa
     protected Object createBean(String beanName, BeanDefinition beanDefinition, Object[] args) throws BeansException {
         Object bean = null;
         try {
+            bean = resolveBeforeInstantiation(beanName, beanDefinition);
             bean = createBeanInstance(beanDefinition, beanName, args);
             //依赖注入
             applyPropertyValue(beanName, bean, beanDefinition);
@@ -107,6 +107,8 @@ public abstract class AbstractAutowiredCapableBeanFactory extends AbstractBeanFa
         }
     }
 
+    //bean的初始化
+    //感知 + 前 + 初始化 + 后
     private Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) throws BeansException {
         //invokeAwareMethods
         if (bean instanceof Aware) {
@@ -138,6 +140,7 @@ public abstract class AbstractAutowiredCapableBeanFactory extends AbstractBeanFa
         return wrappedBean;
     }
 
+    //初始化方法，接口和定义的初始化方法
     private void invokeInitMethods(String beanName, Object bean, BeanDefinition beanDefinition) throws Exception{
         //1.实现接口InitializingBean
         if (bean instanceof InitializingBean) {
@@ -155,6 +158,7 @@ public abstract class AbstractAutowiredCapableBeanFactory extends AbstractBeanFa
         }
     }
 
+    //注册销毁bean，执行销毁方法
     protected void registerDisposableBeanIfNecessary(String beanName, Object bean, BeanDefinition beanDefinition) {
         //非Singleton类型的Bean不执行销毁方法
         if (!beanDefinition.isSingleton()) return;
@@ -164,5 +168,24 @@ public abstract class AbstractAutowiredCapableBeanFactory extends AbstractBeanFa
         }
     }
 
+    //
+    protected Object resolveBeforeInstantiation(String beanName, BeanDefinition beanDefinition) throws BeansException {
+        Object bean = applyBeanPostProcessorBeforeInstantiation(beanDefinition.getBeanClass(), beanName);
+        if (null != bean) {
+            bean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
+        }
+        return bean;
+    }
+
+    //专门执行AOP代理的初始化前方法
+    public Object applyBeanPostProcessorBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
+        for (BeanPostProcessor processor : getBeanPostProcessors()) {
+            if (processor instanceof InstantiationAwareBeanPostProcessor) {
+                Object result = ((InstantiationAwareBeanPostProcessor) processor).postProcessBeforeInstantiation(beanClass, beanName);
+                if (null != result) return result;
+            }
+        }
+        return null;
+    }
 
 }

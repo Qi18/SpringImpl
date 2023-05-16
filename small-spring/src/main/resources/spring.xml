@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans>
 
-<!--    <bean id="userDao" class="cn.springframework.bean.UserDao" init-method="initDataMethod" destroy-method="destroyDataMethod"/>-->
+    <bean id="userService" class="cn.springframework.bean.UserService"/>
 
-    <bean id="userService" class="cn.springframework.bean.UserService" scope="prototype">
-        <property name="uId" value="10001"/>
-        <property name="iUserDao" ref="proxyUserDao"/>
-        <property name="company" value="腾讯"/>
+    <bean class="cn.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
+
+    <bean id="beforeAdvice" class="cn.springframework.test.bean.UserServiceBeforeAdvice"/>
+
+    <bean id="methodInterceptor" class="cn.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor">
+        <property name="advice" ref="beforeAdvice"/>
     </bean>
 
-    <bean id="proxyUserDao" class="cn.springframework.bean.ProxyBeanFactory"/>
-
-    <bean class="cn.springframework.event.CustomEventListener"/>
-<!--    <bean class="cn.springframework.common.MyBeanPostProcessor"/>-->
-<!--    <bean class="cn.springframework.common.MyBeanFactoryPostProcessor"/>-->
+    <bean id="pointcutAdvisor" class="cn.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor">
+        <property name="expression" value="execution(* cn.springframework.bean.IUserService.*(..))"/>
+        <property name="advice" ref="methodInterceptor"/>
+    </bean>
 
 </beans>

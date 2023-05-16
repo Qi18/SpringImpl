@@ -17,12 +17,15 @@ import cn.springframework.context.support.ClassPathXmlApplicationContext;
 import cn.springframework.core.io.DefaultResourceLoader;
 import cn.springframework.core.io.Resource;
 import cn.springframework.event.CustomEvent;
+import com.itextpdf.kernel.pdf.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
 
 /**
  * @author: rich
@@ -53,6 +56,38 @@ public class ApiTest {
         // 测试调用
         System.out.println("测试结果：" + proxy_cglib.register("花花"));
     }
+
+    @Test
+    public void get() throws IOException {
+
+        String sourceFile = "C:\\Users\\rich\\Desktop\\pdf_lrq\\国家电网办〔2022〕619号.pdf";
+        String destinationPath = "C:\\Users\\rich\\Desktop\\1.pdf";
+        PdfDocument pdfDoc = new PdfDocument(new PdfReader(sourceFile), new PdfWriter(destinationPath));
+        int numberOfPages = pdfDoc.getNumberOfPages();
+        for (int i = 1; i <= numberOfPages; i++) {
+            PdfDictionary pageDict = pdfDoc.getPage(i).getPdfObject();
+
+            PdfArray contents = pageDict.getAsArray(PdfName.Contents);
+            PdfStream psw = contents.getAsStream(2);
+
+            psw.setData("".getBytes());
+            psw.clear();
+
+            PdfDictionary resources = pageDict.getAsDictionary(PdfName.Resources);
+            PdfDictionary fonts = resources.getAsDictionary(PdfName.Font);
+
+            fonts.entrySet().forEach(x -> {
+                if (x.getKey().toString().startsWith("/Xi")) {
+                    PdfDictionary p = (PdfDictionary) x.getValue();
+                    p.clear();
+                }
+            });
+        }
+        pdfDoc.close();
+//        Files.delete(new File(sourceFile).toPath());
+//        Files.move(new File(destinationPath).toPath(), new File(sourceFile).toPath());
+    }
+
 
 
 
